@@ -11,8 +11,6 @@ interface TotalTimeBarProps {
 const TotalTimeBar: React.FC<TotalTimeBarProps> = ({ totalMinutes, targetDuration }) => {
   const diff = totalMinutes - targetDuration;
   const isOver = diff > 0;
-  const isUnder = diff < 0;
-
   return (
     <div className="flex flex-col gap-1">
       {/* Inline total inside table footer area */}
