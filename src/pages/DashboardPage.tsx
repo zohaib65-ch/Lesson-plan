@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { arrayMove } from "@dnd-kit/sortable";
 import { v4 as uuidv4 } from "uuid";
 import { Plus } from "lucide-react";
@@ -58,13 +58,20 @@ const defaultLessons: Lesson[] = [
  * Two-column layout: left = lesson table, right = activity details sidebar.
  */
 const DashboardPage: React.FC = () => {
-  const [lessons, setLessons] = useState<Lesson[]>(defaultLessons);
+  const [lessons, setLessons] = useState<Lesson[]>(() => {
+    try {
+      const stored = localStorage.getItem("lessons");
+      return stored ? (JSON.parse(stored) as Lesson[]) : defaultLessons;
+    } catch (e) {
+      return defaultLessons;
+    }
+  });
   const [settings, setSettings] = useState<LessonSettings>({
     targetDuration: 45,
     level: "A2",
     focus: "Speaking",
   });
-  const [selectedId, setSelectedId] = useState<string | null>(defaultLessons[0]?.id || null);
+  const [selectedId, setSelectedId] = useState<string | null>(lessons[0]?.id || null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
 
@@ -125,6 +132,15 @@ const DashboardPage: React.FC = () => {
   const handleDurationChange = (d: number) => {
     setSettings((prev) => ({ ...prev, targetDuration: d }));
   };
+
+  // Persist lessons to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem("lessons", JSON.stringify(lessons));
+    } catch (e) {
+      // ignore write errors
+    }
+  }, [lessons]);
 
   return (
     <div className="min-h-screen bg-gray-50">
